@@ -15,17 +15,19 @@ import android.util.Log
 import android.util.SparseIntArray
 import android.view.Surface
 import android.view.TextureView
-import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import com.google.mlkit.vision.barcode.Barcode
 import com.google.mlkit.vision.barcode.BarcodeScanner
 import com.google.mlkit.vision.barcode.BarcodeScannerOptions
 import com.google.mlkit.vision.barcode.BarcodeScanning
 import com.google.mlkit.vision.common.InputImage
-import kotlinx.android.synthetic.main.activity_main.*
-import kotlinx.coroutines.*
+import kotlinx.android.synthetic.main.activity_camera2.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
-class MainActivity : AppCompatActivity() {
+class Camera2Activity : BaseActivity() {
 
     private lateinit var scanner: BarcodeScanner
     private lateinit var cameraCharacteristics: CameraCharacteristics
@@ -50,8 +52,8 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
-
+        setContentView(R.layout.activity_camera2)
+        initCameraPermission()
         setupManagers()
         startCamera()
 
@@ -75,7 +77,7 @@ class MainActivity : AppCompatActivity() {
     }
 
 
-    private fun startCamera() {
+    override fun startCamera() {
         tvCameraPreview.setSurfaceTextureListener(surfaceReadyCallback)
     }
 
@@ -135,8 +137,8 @@ class MainActivity : AppCompatActivity() {
                 tvCameraPreview.bitmap,
                 getRotationCompensation(
                     backCamera,
-                    this@MainActivity,
-                    this@MainActivity
+                    this@Camera2Activity,
+                    this@Camera2Activity
                 )
             )
 
@@ -145,7 +147,7 @@ class MainActivity : AppCompatActivity() {
 
                     for (barcode in barcodes) {
                         val intent = Intent(
-                            this@MainActivity,
+                            this@Camera2Activity,
                             ResultActivity::class.java
                         ).apply {
                             putExtra("barcode", barcode.rawValue)
@@ -170,7 +172,7 @@ class MainActivity : AppCompatActivity() {
             getBackCamera()
 
             if (ActivityCompat.checkSelfPermission(
-                    this@MainActivity,
+                    this@Camera2Activity,
                     Manifest.permission.CAMERA
                 ) != PackageManager.PERMISSION_GRANTED
             ) {
