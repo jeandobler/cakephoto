@@ -1,6 +1,7 @@
 package com.dobler.cakephoto
 
 import android.annotation.SuppressLint
+import android.util.Log
 import androidx.camera.core.ImageAnalysis
 import androidx.camera.core.ImageProxy
 import com.google.mlkit.vision.barcode.Barcode
@@ -15,28 +16,38 @@ internal class QrCodeAnalyzer(private val luma: (str: String?) -> Unit) : ImageA
             Barcode.FORMAT_QR_CODE
         ).build()
 
-    private var scanner: BarcodeScanner by lazy {
-        BarcodeScanning.getClient(options)
-    }
 
     @SuppressLint("UnsafeExperimentalUsageError")
     override fun analyze(imageProxy: ImageProxy) {
 
+        val scanner: BarcodeScanner by lazy {
+            BarcodeScanning.getClient(options)
+        }
+
+        Log.e("Scanned", "Analyzing")
         val image = imageProxy.image
         if (image != null) {
             val mediaImage = InputImage.fromMediaImage(image, imageProxy.imageInfo.rotationDegrees)
 
+            Log.e("Scanned", "Scanning")
             scanner.process(mediaImage)
                 .addOnSuccessListener { barcodes ->
-
+                    Log.e("Scanned", "Success")
                     for (barcode in barcodes) {
-
+                        Log.e("Scanned", barcode.rawValue.toString())
                         luma(barcode.rawValue)
                         scanner.close()
                         break
-                    }
 
+                    }
+                    imageProxy.close()
+
+                }.addOnFailureListener {
+                    Log.e("Scanned", "Failure")
+                    imageProxy.close()
+//                    scanner.close()
                 }
         }
+
     }
 }

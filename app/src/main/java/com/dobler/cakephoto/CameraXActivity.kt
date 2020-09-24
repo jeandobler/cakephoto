@@ -2,6 +2,7 @@ package com.dobler.cakephoto
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageAnalysis
 import androidx.camera.core.Preview
@@ -41,9 +42,10 @@ class CameraXActivity : BaseActivity() {
             val preview = Preview.Builder()
                 .build()
                 .also {
-                    it.setSurfaceProvider(viewFinder.createSurfaceProvider())
+                    it.setSurfaceProvider(viewFinder.surfaceProvider)
                 }
 
+            //Analyser
             val imageAnalyzer = ImageAnalysis.Builder()
                 .build()
                 .also {
@@ -54,6 +56,7 @@ class CameraXActivity : BaseActivity() {
                         ).apply {
                             putExtra("barcode", it)
                         }
+                        startActivity(intent)
                     })
                 }
 
@@ -65,9 +68,11 @@ class CameraXActivity : BaseActivity() {
                 // Bind use cases to camera
                 cameraProvider.bindToLifecycle(
                     this, cameraSelector, preview, imageAnalyzer
+//                    , imageAnalyzer
                 )
 
             } catch (exc: Exception) {
+                Log.e("Result", exc.message)
             }
 
         }, ContextCompat.getMainExecutor(this))
