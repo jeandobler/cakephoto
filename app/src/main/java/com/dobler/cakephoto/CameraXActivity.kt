@@ -21,14 +21,17 @@ class CameraXActivity : BaseActivity() {
         super.onCreate(savedInstanceState)
 
         setContentView(R.layout.activity_camerax)
-
         initCameraPermission()
-        startCamera()
 
         // Set up the listener for take photo button
         // camera_capture_button.setOnClickListener { takePhoto() }
         cameraExecutor = Executors.newSingleThreadExecutor()
 
+    }
+
+    override fun onStart() {
+        super.onStart()
+        startCamera()
     }
 
     override fun startCamera() {

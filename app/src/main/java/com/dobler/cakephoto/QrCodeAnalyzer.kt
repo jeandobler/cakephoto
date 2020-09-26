@@ -15,14 +15,10 @@ internal class QrCodeAnalyzer(private val luma: (str: String?) -> Unit) : ImageA
         .setBarcodeFormats(
             Barcode.FORMAT_QR_CODE
         ).build()
-
+    val scanner: BarcodeScanner = BarcodeScanning.getClient(options)
 
     @SuppressLint("UnsafeExperimentalUsageError")
     override fun analyze(imageProxy: ImageProxy) {
-
-        val scanner: BarcodeScanner by lazy {
-            BarcodeScanning.getClient(options)
-        }
 
         Log.e("Scanned", "Analyzing")
         val image = imageProxy.image
@@ -33,20 +29,23 @@ internal class QrCodeAnalyzer(private val luma: (str: String?) -> Unit) : ImageA
             scanner.process(mediaImage)
                 .addOnSuccessListener { barcodes ->
                     Log.e("Scanned", "Success")
+
                     for (barcode in barcodes) {
                         Log.e("Scanned", barcode.rawValue.toString())
                         luma(barcode.rawValue)
-                        scanner.close()
-                        break
-
                     }
-                    imageProxy.close()
+                    if (barcodes.isEmpty()) {
+                        imageProxy.close()
+                    }
+
 
                 }.addOnFailureListener {
                     Log.e("Scanned", "Failure")
                     imageProxy.close()
-//                    scanner.close()
                 }
+
+        } else {
+            imageProxy.close()
         }
 
     }
